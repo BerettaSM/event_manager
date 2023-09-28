@@ -21,6 +21,18 @@ def clean_zipcode(zipcode)
     zipcode.to_s.rjust(5, "0")[0..4]
 end
 
+def clean_phone_number(phone_number)
+    stripped_phone = phone_number.gsub(/\D/, '')
+
+    if stripped_phone.length == 10
+        stripped_phone
+    elsif stripped_phone.length == 11 && stripped_phone[0] == "1"
+        stripped_phone[1..-1]
+    else
+        "Invalid phone number"
+    end
+end
+
 def save_thank_you_letter(id, form_letter)
     Dir.mkdir('output') unless Dir.exist?('output')
 
