@@ -58,6 +58,13 @@ def find_peak_hours(registration_dates)
     get_sorted_count(hours)
 end
 
+def find_peak_week_days(registration_dates)
+    # get week days from dates
+    week_days = registration_dates.collect { |date| date.strftime("%A") }
+    # return sorted count of hours
+    get_sorted_count(week_days)
+end
+
 def save_thank_you_letter(id, form_letter)
     Dir.mkdir('output') unless Dir.exist?('output')
 
@@ -91,10 +98,12 @@ contents.each do |row|
 
     form_letter = erb_template.result(binding)
     
-    #save_thank_you_letter(id, form_letter)
+    save_thank_you_letter(id, form_letter)
 end
 
 registration_dates = extract_registration_dates(contents)
 peak_hours = find_peak_hours(registration_dates)
+peak_week_days = find_peak_week_days(registration_dates)
 
-p peak_hours
+puts "Most active hour is: #{peak_hours.to_a.dig(0, 0)}:00"
+puts "Most active day is: #{peak_week_days.to_a.dig(0, 0)}"
