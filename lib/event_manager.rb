@@ -1,6 +1,7 @@
 require 'csv'
 require 'google/apis/civicinfo_v2'
 require 'erb'
+require 'time'
 
 def legislators_by_zipcode(zip)
     civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
@@ -33,6 +34,18 @@ def clean_phone_number(phone_number)
     end
 end
 
+def find_peak_registration_hours(contents)
+    # count hours frequency
+    hours_frequency = contents.reduce(Hash.new) do |count, row|
+        hour = Time.strptime(row[:regdate], "%y/%d/%m %H:%M").hour
+        (count[hour] = 0) unless !count[hour].nil?
+        count[hour] += 1
+        count
+    end
+    # sort and return the result
+    hours_frequency.sort_by { |hour, frequency| frequency }.reverse.to_h
+end
+
 def save_thank_you_letter(id, form_letter)
     Dir.mkdir('output') unless Dir.exist?('output')
 
@@ -60,9 +73,13 @@ contents.each do |row|
 
     zipcode = clean_zipcode(row[:zipcode])
 
+    phone = clean_phone_number(row[:homephone])
+
     legislators = legislators_by_zipcode(zipcode)
 
     form_letter = erb_template.result(binding)
-
+    
     save_thank_you_letter(id, form_letter)
 end
+
+peak_registration_hours = find_peak_registration_hours(contents)
